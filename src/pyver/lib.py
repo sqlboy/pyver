@@ -169,12 +169,9 @@ class Require(object):
     Types = frozenset(["==", ">>", ">=", "<<", "<=", "!="])
 
     """
-
+    A class to represent a verison requirement.
     """
     def __init__(self, reqstr, caller):
-        """
-
-        """
         if reqstr[0:2] not in self.Types:
             raise InvalidRequireString(reqstr)
         self.__reqstr = reqstr
@@ -236,11 +233,3 @@ class Version(object):
 _PYVER = PyVer()
 atexit.register(_PYVER.shutdown)
 
-        
-        
-        
-        
-        
-        
-        
-    
