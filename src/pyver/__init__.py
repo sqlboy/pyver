@@ -1,2 +1,9 @@
+import os
+try:
+	del os.environ["PYTHONPATH"]
+except KeyError:
+	pass
+finally:
+	del os
 
-from all import *
+from lib import *
