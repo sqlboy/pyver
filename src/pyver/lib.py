@@ -206,7 +206,10 @@ class Version(object):
     """
     def __init__(self, ver_str):
         self.__str = ver_str
-        self.__ver = tuple([int(v) for v in ver_str.split(".", 3)])
+        version = [0, 0, 0]
+        for i, num in enumerate(ver_str.split(".", 2)):
+            version[i] = num
+        self.__ver = tuple(version)
 
     @property
     def major(self):

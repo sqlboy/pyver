@@ -30,6 +30,10 @@ class Tests(unittest.TestCase):
         self.assertRaises(pyver.VesionMismatchException, self.ver.use, "foo", "1.1.0")
         self.ver.use("foo", "1.0.0")
 
+    def testRequirePartialEqual(self):
+        self.ver.require("foo", ">=1")
+        self.ver.use("foo", "1.0.0")
+
     def testRequireGreaterThan(self):
         self.ver.require("foo", ">>1.1.0")
         self.assertRaises(pyver.VesionMismatchException, self.ver.use, "foo", "1.0.0")
