@@ -181,17 +181,17 @@ class Require(object):
 
     def is_compatible(self, otherVersion):
         if self.__op == "==":
-            return self.__version.tuple() == otherVersion.tuple()
+            return self.__version.tuple == otherVersion.tuple
         elif self.__op == "!=":
-            return self.__version.tuple() != otherVersion.tuple()
+            return self.__version.tuple != otherVersion.tuple
         elif self.__op == ">>":
-            return self.__version.tuple() < otherVersion.tuple()
+            return self.__version.tuple < otherVersion.tuple
         elif self.__op == "<<":
-            return self.__version.tuple() > otherVersion.tuple()
+            return self.__version.tuple > otherVersion.tuple
         elif self.__op == ">=":
-            return self.__version.tuple() <= otherVersion.tuple()
+            return self.__version.tuple <= otherVersion.tuple
         elif self.__op == "<=":
-            return self.__version.tuple() >= otherVersion.tuple()
+            return self.__version.tuple >= otherVersion.tuple
         return False
 
     def __repr__(self):
@@ -223,6 +223,7 @@ class Version(object):
     def patch(self):
         return self.__ver[2]
 
+    @property
     def tuple(self):
         return self.__ver
             
