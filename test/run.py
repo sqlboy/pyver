@@ -7,6 +7,7 @@ import os
 sys.path.append("../src")
 import pyver
 
+
 class Tests(unittest.TestCase):
     
     def setUp(self):
@@ -35,12 +36,12 @@ class Tests(unittest.TestCase):
         self.ver.use("foo", "1.0.0")
 
     def testRequireGreaterThan(self):
-        self.ver.require("foo", ">>1.1.0")
+        self.ver.require("foo", ">1.1.0")
         self.assertRaises(pyver.VesionMismatchException, self.ver.use, "foo", "1.0.0")
         self.ver.use("foo", "1.2.0")
 
     def testRequireLessThan(self):
-        self.ver.require("foo", "<<1.1.0")
+        self.ver.require("foo", "<1.1.0")
         self.assertRaises(pyver.VesionMismatchException, self.ver.use, "foo", "1.2.0")
         self.ver.use("foo", "1.0.0")
 
@@ -49,7 +50,7 @@ class Tests(unittest.TestCase):
         self.assertRaises(pyver.VesionMismatchException, self.ver.use, "foo", "1.2.0")
         self.ver.use("foo", "1.1.0")
 
-    def testGreaterThanOrEq(self):
+    def testRequireGreaterThanOrEq(self):
         self.ver.require("foo", ">=1.1.0")
         self.assertRaises(pyver.VesionMismatchException, self.ver.use, "foo", "1.0.0")
         self.ver.use("foo", "1.1.0")

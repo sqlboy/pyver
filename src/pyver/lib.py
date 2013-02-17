@@ -27,12 +27,14 @@ import atexit
 import shutil
 import logging
 import inspect
+import re
 
 __all__ = [ "WARN",
             "ABORT",
             "VesionMismatchException",
             "VersionNotFoundException",
             "InvalidRequireString",
+            "InvalidVersionNumber",
             "use",
             "require",
             "platform",
@@ -66,7 +68,12 @@ class InvalidRequireString(Exception):
     """
     pass
 
- 
+class InvalidVersionNumber(Exception):
+    """
+    Thrown when a version number is invalid.
+    """
+    pass
+
 def use(module, version):
     """
     Use a specific version of a given module.  The module may be imported
@@ -135,13 +142,15 @@ class PyVer(object):
 
     def check_requires(self, module, ver):
         try:
+            logger.debug("Calling check requirements")
             for req in self.__require[module]:
                 if req.is_compatible(ver):
                     return
             msg = "%s-%s is not compatible with %s"
             raise VesionMismatchException(msg % (module, ver, self.__require[module]))
 
-        except KeyError:
+        except KeyError, e:
+            logger.debug("Skipping check on module %s-%s, no versions loaded" % (module, ver))
             # No versions are loaded yet
             return
         pass
@@ -166,33 +175,42 @@ class PyVer(object):
 
 class Require(object):
 
-    Types = frozenset(["==", ">>", ">=", "<<", "<=", "!="])
-
     """
     A class to represent a verison requirement.
     """
     def __init__(self, reqstr, caller):
-        if reqstr[0:2] not in self.Types:
-            raise InvalidRequireString(reqstr)
         self.__reqstr = reqstr
-        self.__op = reqstr[0:2]
-        self.__version = Version(reqstr[2:])
+        self.__op = self.__get_op(reqstr)
+        self.__version = Version(reqstr[len(self.__op):])
         self.__caller = caller
 
     def is_compatible(self, otherVersion):
         if self.__op == "==":
-            return self.__version.tuple == otherVersion.tuple
+            result =  self.__version.tuple == otherVersion.tuple
         elif self.__op == "!=":
-            return self.__version.tuple != otherVersion.tuple
-        elif self.__op == ">>":
-            return self.__version.tuple < otherVersion.tuple
-        elif self.__op == "<<":
-            return self.__version.tuple > otherVersion.tuple
-        elif self.__op == ">=":
-            return self.__version.tuple <= otherVersion.tuple
+            result = self.__version.tuple != otherVersion.tuple
         elif self.__op == "<=":
-            return self.__version.tuple >= otherVersion.tuple
-        return False
+            result = self.__version.tuple >= otherVersion.tuple
+        elif self.__op == ">=":
+            result = self.__version.tuple <= otherVersion.tuple
+        elif self.__op == "<":
+            result = self.__version.tuple > otherVersion.tuple
+        elif self.__op == ">":
+            result = self.__version.tuple < otherVersion.tuple
+        else:
+            raise InvalidRequireString(self.__reqstr)
+        
+        logger.debug("%s %s %s = %s" % (self.__version.tuple, self.__op, otherVersion.tuple, result))
+        return result
+
+    def __get_op(self, req):
+        op = req[0:2]
+        if op in (">=", "<=", "==", "!="):
+            return op
+        elif op[0] in (">", "<"):
+            return op[0]
+        else:
+            raise InvalidRequireString(req)
 
     def __repr__(self):
         return "%s (%s)" % (self.__reqstr, self.__caller)
@@ -208,7 +226,11 @@ class Version(object):
         self.__str = ver_str
         version = [0, 0, 0]
         for i, num in enumerate(ver_str.split(".", 2)):
-            version[i] = num
+            try:
+                version[i] = int(num)
+            except ValueError:
+                raise InvalidVersionNumber(ver_str)
+
         self.__ver = tuple(version)
 
     @property
